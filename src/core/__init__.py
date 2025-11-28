@@ -1,0 +1,9 @@
+"""Core infrastructure module"""
+
+from .config import get_settings
+
+settings = get_settings()
+
+__all__ = [
+    "settings",
+]
