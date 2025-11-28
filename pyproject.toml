@@ -1,0 +1,12 @@
+[project]
+name = "nexus-cortex"
+version = "0.1.0"
+description = "A FastAPI-based platform"
+requires-python = ">=3.13"
+
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn>=0.32.0",
+    "uvloop>=0.21.0",
+    "httptools>=0.6.4",
+]
