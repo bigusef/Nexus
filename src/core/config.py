@@ -29,6 +29,8 @@ class Settings(BaseSettings):
     # Project Global Configuration
     environment: Environment = Environment.DEVELOPMENT
 
+    allowed_cors_origins: str = Field(alias="allowed_origins", default="*")
+
     # Database Configuration
     database_dsn: PostgresDsn = Field(alias="database_url", default="postgresql+asyncpg://user:pass@host:5432/db")
 
@@ -46,13 +48,25 @@ class Settings(BaseSettings):
         )
 
     @property
+    def allowed_origins_list(self) -> list[str]:
+        """Get CORS allowed origins as a list.
+
+        Supports comma-separated values or '*' for all origins.
+
+        Returns:
+            List of allowed origin URLs.
+        """
+        return [origin.strip() for origin in self.allowed_cors_origins.split(",") if origin.strip()]
+
+
+    @property
     def database_url(self) -> str:
         """Get database URL as string for SQLAlchemy.
 
         Returns:
             Database connection string.
         """
-        return self.database_dns.unicode_string()
+        return self.database_dsn.unicode_string()
 
 
 @lru_cache
