@@ -1,18 +1,65 @@
-.venv
+# Version control
 .git
 .gitignore
+
+# Virtual environments
+.venv
+venv
+env
+
+# Python cache
 __pycache__
 *.pyc
 *.pyo
+*.pyd
+.Python
+
+# Testing
 .pytest_cache
-.mypy_cache
-.ruff_cache
 .coverage
 htmlcov
+.tox
+.nox
+
+# Linting and type checking
+.mypy_cache
+.ruff_cache
+.dmypy.json
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Environment files (keep example)
 .env
 .env.*
 !.env.example
+
+# Documentation (will be added later)
 *.md
-Makefile
+!README.md
+docs/
+
+# Build artifacts
+dist
+build
+*.egg-info
+.eggs
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+!docker-compose.yml
+
+# Claude
 .claude
 CLAUDE.md
+
+# Misc
+Makefile
+.DS_Store
+*.log
+tmp/
+temp/

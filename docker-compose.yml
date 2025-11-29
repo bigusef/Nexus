@@ -3,9 +3,8 @@ x-nexus-cortex: &nexus-cortex
   build:
     context: .
     dockerfile: Dockerfile
-    args:
-      ENVIRONMENT: ${ENVIRONMENT:-development}
-  image: nexus-cortex
+    target: development
+  image: nexus-cortex:dev
   volumes:
     - .:/app
   depends_on:
