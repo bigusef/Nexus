@@ -4,15 +4,41 @@ This module provides centralized configuration management using pydantic-setting
 Settings are loaded from environment variables and .env file.
 """
 
+from datetime import timedelta
 from functools import lru_cache
 
 from pydantic import Field
 from pydantic import PostgresDsn
 from pydantic import RedisDsn
+from pydantic import SecretStr
 from pydantic_settings import BaseSettings
 from pydantic_settings import SettingsConfigDict
 
 from src.utilities.enums import Environment
+from src.utilities.parser import TimeDeltaStr
+
+
+class JWTSettings(BaseSettings):
+    """JWT token configuration settings.
+
+    Attributes:
+        algorithm: JWT signing algorithm (default: HS256).
+        secret_key: Secret key for signing JWT tokens (must be kept secure).
+        access_expiration: Access token expiration time (e.g., "15m", "1h").
+        refresh_expiration: Refresh token expiration time (e.g., "7d", "30d").
+    """
+
+    model_config = SettingsConfigDict(
+        env_prefix="JWT_",
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
+
+    algorithm: str = "HS256"
+    secret_key: SecretStr
+    access_expiration: TimeDeltaStr = Field(default=timedelta(minutes=15))
+    refresh_expiration: TimeDeltaStr = Field(default=timedelta(days=7))
 
 
 class Settings(BaseSettings):
@@ -40,6 +66,9 @@ class Settings(BaseSettings):
 
     # Redis Configuration
     redis_dsn: RedisDsn = Field(alias="redis_url")
+
+    # JWT Configuration
+    jwt: JWTSettings = Field(default_factory=JWTSettings)
 
     @property
     def debug(self) -> bool:
