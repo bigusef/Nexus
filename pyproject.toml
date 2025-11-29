@@ -1,3 +1,7 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "nexus-cortex"
 version = "0.1.0"
@@ -16,7 +20,11 @@ dependencies = [
     "redis>=5.2.0",
     "arq>=0.26.1",
     "babel>=2.14.0",
+    "typer>=0.9.0",
 ]
+
+[project.scripts]
+nexus = "cli:app"
 
 [dependency-groups]
 dev = [
@@ -68,12 +76,18 @@ docstring-code-line-length = "dynamic"
 convention = "google"
 
 [tool.ruff.lint.isort]
-known-first-party = ["src", "workers"]
+known-first-party = ["src", "workers", "cli"]
 section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
 lines-after-imports = 2
 combine-as-imports = true
 force-single-line = true
 split-on-trailing-comma = true
+
+[tool.uv]
+package = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src", "workers", "cli"]
 
 [tool.babel]
 domain = "messages"
