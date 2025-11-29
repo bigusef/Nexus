@@ -5,7 +5,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from src.core.config import get_settings
 from src.core.events import lifespan
+from src.core.middleware import RequestHeadersMiddleware
 from src.shared.enums import Environment
+
 
 settings = get_settings()
 
@@ -22,7 +24,12 @@ app = FastAPI(
 )
 
 # ─── Middleware ────────────────────────────────────────────────────────
-# Add CORS middleware
+# Note: Middleware execution order is bottom-to-top (last added runs first)
+
+# Request headers middleware (validates X-Source header, parses Accept-Language)
+app.add_middleware(RequestHeadersMiddleware)
+
+# CORS middleware (must be outermost to handle preflight requests)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.allowed_origins_list,

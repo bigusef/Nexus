@@ -109,15 +109,15 @@ class Language(StrEnum):
         return cls.EN
 
     @classmethod
-    def supported_codes(cls) -> list[str]:
-        """
-        Get list of all supported language codes.
+    @property
+    def values(cls) -> list[str]:
+        """Get list of all supported language codes.
 
         Returns:
-            List of ISO 639-1 codes
+            List of ISO 639-1 codes.
 
         Example:
-            ["ar", "en", "fr", "de", "ru", "it", "es", "tr"]
+            Language.values  # ["ar", "de", "en", "es", "fr", "ru", "it"]
         """
         return [lang.value for lang in cls]
 
@@ -138,3 +138,31 @@ class Language(StrEnum):
             self.RU: "Русский",
             self.IT: "Italiano"
         }[self]
+
+
+class Platform(StrEnum):
+    """Request source/platform enumeration.
+
+    Identifies the client platform making the request.
+    Used for platform-specific logic and access control.
+
+    Attributes:
+        ADMIN: Dashboard for staff users
+        CUSTOMER: Mobile app for regular users
+    """
+
+    ADMIN = "admin"
+    CUSTOMER = "customer"
+
+    @classmethod
+    @property
+    def values(cls) -> list[str]:
+        """Get list of all platform values.
+
+        Returns:
+            List of platform string values.
+
+        Example:
+            Platform.values  # ["admin", "customer"]
+        """
+        return [p.value for p in cls]
