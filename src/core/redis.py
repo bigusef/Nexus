@@ -6,6 +6,7 @@ import redis.asyncio as aioredis
 
 from src.core import settings
 
+
 # Global Redis connection pool
 redis_pool: aioredis.ConnectionPool | None = None
 
@@ -36,7 +37,7 @@ async def close_redis() -> None:
         redis_pool = None
 
 
-async def get_redis() -> AsyncGenerator[aioredis.Redis, None]:
+async def get_redis() -> AsyncGenerator[aioredis.Redis]:
     """Provide Redis client for dependency injection.
 
     Yields:

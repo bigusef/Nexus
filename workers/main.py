@@ -61,6 +61,7 @@ class WorkerSettings:
         keep_result: How long to keep job results in seconds.
         retry_jobs: Whether to retry failed jobs.
     """
+
     # Redis connection
     redis_settings = RedisSettings.from_dsn(settings.redis_url)
 

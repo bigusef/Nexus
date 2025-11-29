@@ -6,8 +6,11 @@ Settings are loaded from environment variables and .env file.
 
 from functools import lru_cache
 
-from pydantic import PostgresDsn, RedisDsn, Field
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import Field
+from pydantic import PostgresDsn
+from pydantic import RedisDsn
+from pydantic_settings import BaseSettings
+from pydantic_settings import SettingsConfigDict
 
 from src.shared.enums import Environment
 
@@ -61,7 +64,6 @@ class Settings(BaseSettings):
             List of allowed origin URLs.
         """
         return [origin.strip() for origin in self.allowed_cors_origins.split(",") if origin.strip()]
-
 
     @property
     def database_url(self) -> str:

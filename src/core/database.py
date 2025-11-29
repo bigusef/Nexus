@@ -2,14 +2,13 @@
 
 from collections.abc import AsyncGenerator
 
-from sqlalchemy.ext.asyncio import (
-    AsyncEngine,
-    AsyncSession,
-    async_sessionmaker,
-    create_async_engine,
-)
+from sqlalchemy.ext.asyncio import AsyncEngine
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import async_sessionmaker
+from sqlalchemy.ext.asyncio import create_async_engine
 
 from src.core import settings
+
 
 # Global database engine and session factory
 engine: AsyncEngine | None = None
@@ -25,8 +24,8 @@ async def init_database() -> None:
 
     engine = create_async_engine(
         settings.database_url,
-        echo=settings.debug, # Log SQL queries in debug mode
-        pool_pre_ping=True, # Verify connections before using
+        echo=settings.debug,  # Log SQL queries in debug mode
+        pool_pre_ping=True,  # Verify connections before using
         pool_size=10,
         max_overflow=20,
     )
@@ -54,7 +53,7 @@ async def close_database() -> None:
         async_session_factory = None
 
 
-async def get_session() -> AsyncGenerator[AsyncSession, None]:
+async def get_session() -> AsyncGenerator[AsyncSession]:
     """Provide async database session for dependency injection.
 
     Yields:

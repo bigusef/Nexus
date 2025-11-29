@@ -11,10 +11,11 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
-from src.core import settings
 
 # Import Entity and all entities for auto-discovery
 from src.abstract.entity import Entity
+from src.core import settings
+
 
 # Setup logger for Alembic
 logger = logging.getLogger("alembic")

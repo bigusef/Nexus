@@ -2,10 +2,14 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from sqlalchemy.exc import NoResultFound
 
 from src.core.config import get_settings
 from src.core.events import lifespan
 from src.core.middleware import RequestHeadersMiddleware
+from src.routers.admin import admin_app
+from src.routers.customer import customer_app
 from src.shared.enums import Environment
 
 
@@ -39,6 +43,23 @@ app.add_middleware(
 )
 
 
+# ─── Exception Handlers ────────────────────────────────────────────────
+@app.exception_handler(ValueError)
+async def value_error_exception_handler(_, exc):
+    return JSONResponse(
+        status_code=400,
+        content={"detail": str(exc)},
+    )
+
+
+@app.exception_handler(NoResultFound)
+async def no_result_found_exception_handler(_, exc):
+    return JSONResponse(
+        status_code=404,
+        content={"detail": str(exc)},
+    )
+
+
 # ─── Main Routers ──────────────────────────────────────────────────────
 @app.get("/health", include_in_schema=False)
 async def health_check() -> dict[str, str]:
@@ -47,3 +68,8 @@ async def health_check() -> dict[str, str]:
         "status": "healthy",
         "environment": settings.environment,
     }
+
+
+# Mount the platform APIs
+app.mount("/customer", customer_app)
+app.mount("/admin", admin_app)

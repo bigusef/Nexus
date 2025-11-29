@@ -8,10 +8,11 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 from starlette.responses import Response
 
-from .context import set_language
-from .context import set_platform
 from src.shared.enums import Language
 from src.shared.enums import Platform
+
+from .context import set_language
+from .context import set_platform
 
 
 # Paths excluded from X-Source validation

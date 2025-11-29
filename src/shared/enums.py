@@ -33,7 +33,6 @@ class Environment(StrEnum):
         return cls.DEVELOPMENT
 
 
-
 class Language(StrEnum):
     """
     Supported languages in the application.
@@ -136,7 +135,7 @@ class Language(StrEnum):
             self.ES: "Español",
             self.FR: "Français",
             self.RU: "Русский",
-            self.IT: "Italiano"
+            self.IT: "Italiano",
         }[self]
 
 
