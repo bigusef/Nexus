@@ -6,7 +6,7 @@ from typing import Annotated
 
 import typer
 
-from src.shared.enums import Language
+from src.utilities.enums import Language
 
 
 app = typer.Typer(no_args_is_help=True)

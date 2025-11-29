@@ -7,7 +7,7 @@ the request context language. Translations are loaded at startup.
 import gettext
 from pathlib import Path
 
-from src.shared.enums import Language
+from src.utilities.enums import Language
 
 from .context import get_language
 

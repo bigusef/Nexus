@@ -3,7 +3,8 @@
 from fastapi import FastAPI
 
 from src.core import settings
-from src.shared.enums import Environment
+from src.utilities.enums import Environment
+
 
 # Create atlas FastAPI application
 admin_app = FastAPI(

@@ -8,8 +8,8 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 from starlette.responses import Response
 
-from src.shared.enums import Language
-from src.shared.enums import Platform
+from src.utilities.enums import Language
+from src.utilities.enums import Platform
 
 from .context import set_language
 from .context import set_platform

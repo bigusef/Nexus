@@ -1,16 +1,17 @@
 """Main FastAPI application entry point."""
 
 from fastapi import FastAPI
+from fastapi import Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from sqlalchemy.exc import NoResultFound
 
 from src.core.config import get_settings
 from src.core.events import lifespan
 from src.core.middleware import RequestHeadersMiddleware
+from src.exceptions import BaseAppException
 from src.routers.admin import admin_app
 from src.routers.customer import customer_app
-from src.shared.enums import Environment
+from src.utilities.enums import Environment
 
 
 settings = get_settings()
@@ -44,18 +45,11 @@ app.add_middleware(
 
 
 # ─── Exception Handlers ────────────────────────────────────────────────
-@app.exception_handler(ValueError)
-async def value_error_exception_handler(_, exc):
+@app.exception_handler(BaseAppException)
+async def app_exception_handler(_: Request, exc: BaseAppException) -> JSONResponse:
+    """Handle all application exceptions with proper status codes and i18n messages."""
     return JSONResponse(
-        status_code=400,
-        content={"detail": str(exc)},
-    )
-
-
-@app.exception_handler(NoResultFound)
-async def no_result_found_exception_handler(_, exc):
-    return JSONResponse(
-        status_code=404,
+        status_code=exc.status_code,
         content={"detail": str(exc)},
     )
 

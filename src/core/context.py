@@ -7,8 +7,8 @@ concurrent requests don't interfere with each other.
 
 from contextvars import ContextVar
 
-from src.shared.enums import Language
-from src.shared.enums import Platform
+from src.utilities.enums import Language
+from src.utilities.enums import Platform
 
 
 # Context variables for request-scoped data (async-safe)

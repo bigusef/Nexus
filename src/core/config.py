@@ -12,7 +12,7 @@ from pydantic import RedisDsn
 from pydantic_settings import BaseSettings
 from pydantic_settings import SettingsConfigDict
 
-from src.shared.enums import Environment
+from src.utilities.enums import Environment
 
 
 class Settings(BaseSettings):
