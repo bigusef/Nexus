@@ -19,6 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.abstract.entity import Entity
 from src.exceptions import NotFoundException
 
+
 # Type alias for filter conditions
 type FilterType = ColumnElement[bool] | bool
 
@@ -71,11 +72,17 @@ class Repository[EntityT: Entity]:
         ```
 
     Attributes:
-        entity: The SQLAlchemy entity class this repository manages.
-        session: The async database session.
+        _entity: The SQLAlchemy entity class (auto-detected from type parameter).
+        _session: The async database session.
     """
 
-    entity: type[EntityT]
+    _entity: type[Entity]
+    __orig_bases__: tuple[type, ...]
+
+    def __init_subclass__(cls, **kwargs: Any) -> None:
+        """Extract entity type from generic parameter when subclass is defined."""
+        super().__init_subclass__(**kwargs)
+        cls._entity = cls.__orig_bases__[0].__args__[0]
 
     def __init__(self, session: AsyncSession) -> None:
         """Initialize repository with database session.
@@ -115,7 +122,7 @@ class Repository[EntityT: Entity]:
             total_users = await repo.count()
             active_users = await repo.count(User.is_locked == False)
         """
-        stmt = select(func.count()).select_from(self.entity)
+        stmt = select(func.count()).select_from(self._entity)
 
         if filters:
             stmt = stmt.where(*filters)
@@ -160,7 +167,7 @@ class Repository[EntityT: Entity]:
             if user is None:
                 # Handle not found case
         """
-        stmt = select(self.entity).where(*filters)
+        stmt = select(self._entity).where(*filters)
         result = await self._session.execute(stmt)
         # one_or_none() raises MultipleResultsFound if more than one result
         return result.scalars().one_or_none()
@@ -184,14 +191,14 @@ class Repository[EntityT: Entity]:
         """
         from sqlalchemy.exc import NoResultFound
 
-        stmt = select(self.entity).where(*filters)
+        stmt = select(self._entity).where(*filters)
         result = await self._session.execute(stmt)
         try:
             # one() raises NoResultFound or MultipleResultsFound
             return result.scalars().one()
         except NoResultFound:
             raise NotFoundException(
-                entity_name=self.entity.__name__,
+                entity_name=self._entity.__name__,
                 entity_id=str(filters),
             ) from None
 
@@ -210,7 +217,7 @@ class Repository[EntityT: Entity]:
         Example:
             user = await repo.get_by_id(user_id)
         """
-        return await self.get_one(self.entity.pk == pk)
+        return await self.get_one(self._entity.pk == pk)
 
     async def select_all(self, *filters: FilterType) -> Sequence[EntityT]:
         """Select all entities matching optional filters.
@@ -225,17 +232,17 @@ class Repository[EntityT: Entity]:
             all_users = await repo.select_all()
             active_users = await repo.select_all(User.is_locked == False)
         """
-        stmt = select(self.entity)
+        stmt = select(self._entity)
         if filters:
             stmt = stmt.where(*filters)
         result = await self._session.execute(stmt)
         return result.scalars().all()
 
     async def paginate(
-            self,
-            *filters: FilterType,
-            limit: int = 20,
-            offset: int = 0,
+        self,
+        *filters: FilterType,
+        limit: int = 20,
+        offset: int = 0,
     ) -> tuple[Sequence[EntityT], int]:
         """Get paginated entities with total count.
 
@@ -255,7 +262,7 @@ class Repository[EntityT: Entity]:
             )
         """
         # Build query
-        stmt = select(self.entity)
+        stmt = select(self._entity)
         if filters:
             stmt = stmt.where(*filters)
 
@@ -284,7 +291,7 @@ class Repository[EntityT: Entity]:
         if not ids:
             return []
 
-        stmt = select(self.entity).where(self.entity.pk.in_(ids))
+        stmt = select(self._entity).where(self._entity.pk.in_(ids))
         result = await self._session.execute(stmt)
         return result.scalars().all()
 
@@ -309,7 +316,7 @@ class Repository[EntityT: Entity]:
                 last_name="Doe"
             )
         """
-        instance = self.entity(**kwargs)
+        instance = self._entity(**kwargs)
         self._session.add(instance)
 
         if flush:
@@ -339,10 +346,10 @@ class Repository[EntityT: Entity]:
         return entity
 
     async def bulk_create(
-            self,
-            entities_data: Sequence[dict[str, Any]],
-            *,
-            flush: bool = True,
+        self,
+        entities_data: Sequence[dict[str, Any]],
+        *,
+        flush: bool = True,
     ) -> Sequence[EntityT]:
         """Create multiple entities in bulk.
 
@@ -359,7 +366,7 @@ class Repository[EntityT: Entity]:
                 {"email": "user2@example.com", "first_name": "User2"},
             ])
         """
-        instances = [self.entity(**data) for data in entities_data]
+        instances = [self._entity(**data) for data in entities_data]
         self._session.add_all(instances)
 
         if flush:
@@ -372,11 +379,11 @@ class Repository[EntityT: Entity]:
     # =========================================================================
 
     async def update(
-            self,
-            entity: EntityT,
-            *,
-            flush: bool = True,
-            **kwargs: Any,
+        self,
+        entity: EntityT,
+        *,
+        flush: bool = True,
+        **kwargs: Any,
     ) -> EntityT:
         """Update a single entity with given values.
 
@@ -401,10 +408,10 @@ class Repository[EntityT: Entity]:
         return entity
 
     async def update_by_filters(
-            self,
-            values: dict[str, Any],
-            *filters: FilterType,
-            flush: bool = True,
+        self,
+        values: dict[str, Any],
+        *filters: FilterType,
+        flush: bool = True,
     ) -> int:
         """Update multiple entities matching filters.
 
@@ -422,7 +429,7 @@ class Repository[EntityT: Entity]:
                 User.last_login < cutoff_date
             )
         """
-        stmt = update(self.entity).where(*filters).values(**values)
+        stmt = update(self._entity).where(*filters).values(**values)
         result = await self._session.execute(stmt)
 
         if flush:
@@ -431,11 +438,11 @@ class Repository[EntityT: Entity]:
         return result.rowcount
 
     async def bulk_update(
-            self,
-            entities: Sequence[EntityT],
-            values: dict[str, Any],
-            *,
-            flush: bool = True,
+        self,
+        entities: Sequence[EntityT],
+        values: dict[str, Any],
+        *,
+        flush: bool = True,
     ) -> Sequence[EntityT]:
         """Update multiple entity instances with same values.
 
@@ -498,7 +505,7 @@ class Repository[EntityT: Entity]:
         """
         if not filters:
             raise ValueError("At least one filter is required for bulk delete")
-        stmt = delete(self.entity).where(*filters)
+        stmt = delete(self._entity).where(*filters)
         result = await self._session.execute(stmt)
 
         if flush:
