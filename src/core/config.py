@@ -6,7 +6,7 @@ Settings are loaded from environment variables and .env file.
 
 from functools import lru_cache
 
-from pydantic import PostgresDsn, Field
+from pydantic import PostgresDsn, RedisDsn, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from src.shared.enums import Environment
@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     Attributes:
         environment: Current runtime environment. Defaults to development.
         database_dsn: PostgreSQL async connection DSN using asyncpg driver.
+        redis_dsn: Redis connection DSN for cache and message broker.
     """
 
     model_config = SettingsConfigDict(
@@ -33,6 +34,9 @@ class Settings(BaseSettings):
 
     # Database Configuration
     database_dsn: PostgresDsn = Field(alias="database_url", default="postgresql+asyncpg://user:pass@host:5432/db")
+
+    # Redis Configuration
+    redis_dsn: RedisDsn = Field(alias="redis_url", default="redis://localhost:6379/0")
 
     @property
     def debug(self) -> bool:
@@ -67,6 +71,15 @@ class Settings(BaseSettings):
             Database connection string.
         """
         return self.database_dsn.unicode_string()
+
+    @property
+    def redis_url(self) -> str:
+        """Get Redis URL as string.
+
+        Returns:
+            Redis connection string.
+        """
+        return self.redis_dsn.unicode_string()
 
 
 @lru_cache

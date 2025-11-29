@@ -36,7 +36,7 @@ AsyncSessionLocal = async_sessionmaker(
 )
 
 
-async def init_db() -> None:
+async def init_database() -> None:
     """Initialize database connection (called on startup)"""
     # Test connection
     async with engine.begin() as conn:
@@ -46,7 +46,7 @@ async def init_db() -> None:
         pass
 
 
-async def close_db() -> None:
+async def close_database() -> None:
     """Close database connection (called on shutdown)"""
     await engine.dispose()
 

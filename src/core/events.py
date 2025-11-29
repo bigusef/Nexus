@@ -2,13 +2,17 @@
 
 This module provides lifespan management for startup and shutdown events.
 """
-
+import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from src.core.database import close_db, init_db
+from src.core.database import close_database, init_database
+from src.core.redis import close_redis, init_redis
+
+
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
@@ -16,8 +20,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Manage application lifespan events.
 
     Handles startup and shutdown tasks:
-    - Startup: Initialize database connection
-    - Shutdown: Close database connection and cleanup resources
+    - Startup: Initialize database and Redis connections
+    - Shutdown: Close database and Redis connections
 
     Args:
         app: FastAPI application instance.
@@ -26,9 +30,43 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         None after startup tasks complete.
     """
     # Startup
-    await init_db()
+    logger.info("Starting up application...")
+
+    # Initialize database
+    try:
+        await init_database()
+        logger.info("Database connection initialized")
+    except Exception as e:
+        logger.error(f"Failed to initialize database: {e}")
+        raise
+
+    # Initialize Redis
+    try:
+        await init_redis()
+        logger.info("Redis connection initialized")
+    except Exception as e:
+        logger.error(f"Failed to initialize Redis: {e}")
+        raise
+
+    logger.info("Application startup complete")
 
     yield
 
     # Shutdown
-    await close_db()
+    logger.info("Shutting down application...")
+
+    # Close database connection
+    try:
+        await close_database()
+        logger.info("Database connection closed")
+    except Exception as e:
+        logger.error(f"Error closing database: {e}")
+
+    # Close Redis connection
+    try:
+        await close_redis()
+        logger.info("Redis connection closed")
+    except Exception as e:
+        logger.error(f"Error closing Redis: {e}")
+
+    logger.info("Application shutdown complete")
