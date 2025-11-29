@@ -158,11 +158,11 @@ class JWTService:
     # =========================================================================
 
     def _create_access_token(
-            self,
-            user_id: UUID,
-            email: str,
-            is_staff: bool,
-            version: int,
+        self,
+        user_id: UUID,
+        email: str,
+        is_staff: bool,
+        version: int,
     ) -> str:
         """Create a JWT access token.
 
@@ -221,10 +221,10 @@ class JWTService:
         return token
 
     async def create_token_pair(
-            self,
-            user_id: UUID,
-            email: str,
-            is_staff: bool,
+        self,
+        user_id: UUID,
+        email: str,
+        is_staff: bool,
     ) -> TokenPair:
         """Create both access and refresh tokens.
 
@@ -344,7 +344,8 @@ class JWTService:
         This method:
         1. Verifies the refresh token is valid and not revoked
         2. Creates a new access token
-        3. Returns the original refresh token (no rotation)
+        3. If refresh token expires within 2x access token lifetime, rotates it
+        4. Otherwise, returns the original refresh token
 
         Note: The auth service should validate that the user still exists
         and is active before calling this method.
@@ -355,7 +356,7 @@ class JWTService:
             is_staff: Whether user is staff/admin (from database).
 
         Returns:
-            TokenPair with new access token and original refresh token.
+            TokenPair with new access token and (possibly rotated) refresh token.
 
         Raises:
             InvalidTokenException: If token is invalid.
@@ -364,9 +365,23 @@ class JWTService:
         """
         payload = await self.verify_refresh_token(refresh_token)
 
-        # Create new access token only
         version = await self._get_token_version(payload.sub)
         access_token = self._create_access_token(payload.sub, email, is_staff, version)
+
+        # Check if refresh token needs rotation
+        # Rotate if remaining time < 2 * access token expiration
+        now = datetime.now(UTC)
+        refresh_exp = datetime.fromtimestamp(payload.exp, tz=UTC)
+        remaining_time = refresh_exp - now
+        rotation_threshold = self._access_expiration * 2
+
+        if remaining_time < rotation_threshold:
+            # Revoke old refresh token and create new one
+            if payload.jti:
+                await self.revoke_refresh_token(payload.jti)
+
+            new_refresh_token = await self._create_refresh_token(payload.sub, version)
+            return TokenPair(access=access_token, refresh=new_refresh_token)
 
         return TokenPair(access=access_token, refresh=refresh_token)
 
