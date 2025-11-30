@@ -3,6 +3,7 @@
 # ruff: noqa: E402
 # Set test environment variables BEFORE importing application modules
 import os
+import subprocess
 
 os.environ.setdefault("ENVIRONMENT", "testing")
 os.environ.setdefault("DATABASE_URL", "postgresql+asyncpg://nexus:nexus@localhost:5432/nexus")
@@ -24,7 +25,6 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine
 
-from src.abstract.entity import Entity
 from src.core import i18n as i18n_module
 from src.core import settings
 from src.core.database import get_session
@@ -41,12 +41,23 @@ for lang in Language:
     i18n_module._translations[lang.value] = gettext_module.NullTranslations()
 
 
+def _run_alembic_migrations() -> None:
+    """Run Alembic migrations to set up the database schema."""
+    result = subprocess.run(
+        ["alembic", "upgrade", "head"],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(f"Alembic migration failed: {result.stderr}")
+
+
 # =============================================================================
 # DATABASE FIXTURES
 # =============================================================================
 
-# Track if tables were created
-_tables_created = False
+# Track if migrations were run
+_migrations_run = False
 
 
 @pytest_asyncio.fixture
@@ -56,19 +67,18 @@ async def db_session() -> AsyncGenerator[AsyncSession, None]:
     Each test runs in a transaction that is rolled back after the test completes,
     ensuring test isolation without needing to recreate tables.
     """
-    global _tables_created
+    global _migrations_run
+
+    # Run Alembic migrations on first use
+    if not _migrations_run:
+        _run_alembic_migrations()
+        _migrations_run = True
 
     engine = create_async_engine(
         settings.database_url,
         echo=False,
         pool_pre_ping=True,
     )
-
-    # Create tables on first use
-    if not _tables_created:
-        async with engine.begin() as conn:
-            await conn.run_sync(Entity.metadata.create_all)
-        _tables_created = True
 
     # Use a connection with a transaction that we can rollback
     async with engine.connect() as conn:
