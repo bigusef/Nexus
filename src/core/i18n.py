@@ -4,7 +4,7 @@ Provides gettext-based translation functions that integrate with
 the request context language. Translations are loaded at startup.
 """
 
-import gettext
+import gettext as gettext_module
 from pathlib import Path
 
 from src.utilities.enums import Language
@@ -16,7 +16,7 @@ LOCALES_PATH = Path(__file__).parent.parent.parent / "locales"
 DOMAIN = "messages"
 
 # Translation cache (loaded at startup)
-_translations: dict[str, gettext.GNUTranslations] = {}
+_translations: dict[str, gettext_module.GNUTranslations] = {}
 
 
 def init_translations() -> None:
@@ -27,16 +27,16 @@ def init_translations() -> None:
     """
     for lang in Language:
         try:
-            _translations[lang.value] = gettext.translation(
+            _translations[lang.value] = gettext_module.translation(
                 DOMAIN,
                 localedir=LOCALES_PATH,
                 languages=[lang.value],
             )
         except FileNotFoundError:
-            _translations[lang.value] = gettext.NullTranslations()
+            _translations[lang.value] = gettext_module.NullTranslations()
 
 
-def _get_translator() -> gettext.GNUTranslations:
+def _get_translator() -> gettext_module.GNUTranslations:
     """Get translator for current request language."""
     lang = get_language()
     return _translations.get(lang.value, _translations.get("en"))
