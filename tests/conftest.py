@@ -1,17 +1,11 @@
 """Global test fixtures for Nexus Cortex."""
 
 # ruff: noqa: E402
-# Set test environment variables BEFORE importing application modules
+# Set test environment BEFORE importing application modules
 import os
 import subprocess
 
-os.environ.setdefault("ENVIRONMENT", "testing")
-os.environ.setdefault("DATABASE_URL", "postgresql+asyncpg://nexus:nexus@localhost:5432/nexus")
-os.environ.setdefault("REDIS_URL", "redis://localhost:6379/0")
-os.environ.setdefault("JWT_SECRET_KEY", "test-secret-key-for-testing-only-do-not-use-in-production")
-os.environ.setdefault("JWT_ACCESS_EXPIRATION", "15m")
-os.environ.setdefault("JWT_REFRESH_EXPIRATION", "7d")
-os.environ.setdefault("ALLOWED_ORIGINS", "*")
+os.environ["ENVIRONMENT"] = "testing"
 
 import gettext as gettext_module
 from collections.abc import AsyncGenerator
