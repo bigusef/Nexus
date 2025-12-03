@@ -10,7 +10,7 @@ import typer
 from src.core.database import close_database
 from src.core.database import get_session_context
 from src.core.database import init_database
-from src.core.jwt import JWTService
+from src.security import JWTService
 from src.core.redis import close_redis
 from src.core.redis import init_redis
 from src.core.redis import redis_pool

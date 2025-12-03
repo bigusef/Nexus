@@ -4,7 +4,7 @@ from uuid import uuid4
 
 import pytest
 
-from src.core.jwt import JWTService
+from src.security import JWTService
 from src.domains.auth.entities import User
 from src.domains.auth.repositories import UserRepository
 from src.domains.auth.services import AuthService

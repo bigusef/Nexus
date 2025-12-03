@@ -5,6 +5,7 @@
 import os
 import subprocess
 
+
 os.environ["ENVIRONMENT"] = "testing"
 
 import gettext as gettext_module
@@ -22,13 +23,14 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from src.core import i18n as i18n_module
 from src.core import settings
 from src.core.database import get_session
-from src.core.jwt import JWTService
 from src.core.redis import get_redis
 from src.domains.auth.entities import User
 from src.domains.auth.repositories import UserRepository
 from src.domains.auth.services import AuthService
 from src.main import app
+from src.security import JWTService
 from src.utilities.enums import Language
+
 
 # Initialize translations for tests using NullTranslations (returns original strings)
 for lang in Language:
@@ -55,7 +57,7 @@ _migrations_run = False
 
 
 @pytest_asyncio.fixture
-async def db_session() -> AsyncGenerator[AsyncSession, None]:
+async def db_session() -> AsyncGenerator[AsyncSession]:
     """Provide a transactional database session for each test.
 
     Each test runs in a transaction that is rolled back after the test completes,
@@ -183,7 +185,7 @@ async def locked_user(db_session) -> User:
 
 
 @pytest_asyncio.fixture
-async def client(db_session, fake_redis) -> AsyncGenerator[AsyncClient, None]:
+async def client(db_session, fake_redis) -> AsyncGenerator[AsyncClient]:
     """Provide an async HTTP client for API testing."""
 
     async def override_get_session():

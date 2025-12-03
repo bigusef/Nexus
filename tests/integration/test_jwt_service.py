@@ -6,8 +6,7 @@ from uuid import uuid4
 import pytest
 from freezegun import freeze_time
 
-from src.core.jwt import JWTService
-from src.core.jwt import TokenPayload
+from src.security import JWTService
 from src.exceptions import ExpiredTokenException
 from src.exceptions import InvalidTokenException
 from src.exceptions import RevokedTokenException
