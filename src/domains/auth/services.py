@@ -81,7 +81,7 @@ class AuthService:
             raise AuthenticationException("User not found") from None
 
     async def logout(self, refresh_token: str) -> None:
-        """Logout from current device by revoking refresh token.
+        """Logout from the current device by revoking the refresh token.
 
         Args:
             refresh_token: Current refresh token to revoke.

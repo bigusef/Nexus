@@ -368,7 +368,7 @@ class JWTService:
         version = await self._get_token_version(payload.sub)
         access_token = self._create_access_token(payload.sub, email, is_staff, version)
 
-        # Check if refresh token needs rotation
+        # Check if the refresh token needs rotation
         # Rotate if remaining time < 2 * access token expiration
         now = datetime.now(UTC)
         refresh_exp = datetime.fromtimestamp(payload.exp, tz=UTC)

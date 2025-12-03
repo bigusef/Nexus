@@ -10,6 +10,7 @@ from src.core.events import lifespan
 from src.core.middleware import RequestHeadersMiddleware
 from src.exceptions import BaseAppException
 from src.routers.admin import admin_app
+from src.routers.auth import router as auth_router
 from src.routers.customer import customer_app
 from src.utilities.enums import Environment
 
@@ -63,6 +64,9 @@ async def health_check() -> dict[str, str]:
         "environment": settings.environment,
     }
 
+
+# Include auth router on root app
+app.include_router(auth_router)
 
 # Mount the platform APIs
 app.mount("/customer", customer_app)

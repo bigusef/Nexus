@@ -93,6 +93,16 @@ async def _generate_tokens(user: User) -> tuple[str, str]:
         await redis_client.aclose()
 
 
+async def _revoke_all_user_tokens(user: User) -> None:
+    """Revoke all tokens for a user (logout from all devices)."""
+    redis_client = aioredis.Redis(connection_pool=redis_pool)
+    try:
+        jwt_service = JWTService(redis_client)
+        await jwt_service.revoke_all_user_tokens(user.pk)
+    finally:
+        await redis_client.aclose()
+
+
 def _prompt_email() -> str:
     """Prompt for email with format validation and uniqueness check."""
     while True:
@@ -155,7 +165,8 @@ def lock(
             return
 
         asyncio.run(_update_user_lock_status(user, is_locked=True))
-        typer.echo(f"User '{email}' has been locked.")
+        asyncio.run(_revoke_all_user_tokens(user))
+        typer.echo(f"User '{email}' has been locked and logged out from all devices.")
     finally:
         asyncio.run(_close_services())
 
