@@ -17,6 +17,7 @@ from jose import jwt
 from pydantic import BaseModel
 from pydantic import Field
 
+from src.abstract import Service
 from src.core import settings
 from src.core.redis import get_redis
 from src.exceptions import ExpiredTokenException
@@ -44,7 +45,7 @@ class TokenPair(BaseModel):
     refresh: str = Field(description="JWT refresh token")
 
 
-class JWTService:
+class JWTService(Service):
     """JWT token generation and verification service.
 
     Handles creation and verification of access and refresh tokens.
@@ -55,17 +56,14 @@ class JWTService:
     - Individual refresh token revocation via Redis
     - Separate access/refresh token types to prevent misuse
     - Short-lived access tokens, long-lived refresh tokens
+    - Auto-generated `.DI` type alias for FastAPI dependency injection
 
     Usage with FastAPI (automatic dependency injection):
         ```python
-        from typing import Annotated
-        from fastapi import Depends
         from src.security import JWTService
 
         @app.post("/login")
-        async def login(
-            jwt_service: Annotated[JWTService, Depends()],
-        ):
+        async def login(jwt_service: JWTService.DI):
             tokens = await jwt_service.create_token_pair(
                 user_id=user.pk,
                 email=user.email,

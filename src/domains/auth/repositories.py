@@ -2,7 +2,7 @@
 
 from uuid import UUID
 
-from src.abstract.repository import Repository
+from src.abstract import Repository
 
 from .entities import User
 

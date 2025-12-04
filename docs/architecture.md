@@ -95,11 +95,11 @@ class User(Entity, TimeStampMixin, StatusMixin):
 The generic `Repository[T]` base class provides type-safe CRUD operations:
 
 ```python
-from src.abstract.repository import Repository
+from src.abstract import Repository
 from .entities import User
 
 class UserRepository(Repository[User]):
-    entity = User
+    # Entity type is auto-detected from generic parameter
 
     # Add domain-specific methods
     async def select_by_email(self, email: str) -> User | None:

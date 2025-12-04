@@ -1,9 +1,6 @@
 """Authentication API routes for the root application."""
 
-from typing import Annotated
-
 from fastapi import APIRouter
-from fastapi import Depends
 from fastapi import status
 from pydantic import BaseModel
 from pydantic import Field
@@ -39,8 +36,8 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
     },
 )
 async def refresh_tokens(
-        request: RefreshTokenRequest,
-        auth_service: Annotated[AuthService, Depends()],
+    request: RefreshTokenRequest,
+    auth_service: AuthService.DI,
 ) -> TokenPair:
     """Refresh access token using a valid refresh token.
 
@@ -64,8 +61,8 @@ async def refresh_tokens(
     },
 )
 async def logout(
-        request: RefreshTokenRequest,
-        auth_service: Annotated[AuthService, Depends()],
+    request: RefreshTokenRequest,
+    auth_service: AuthService.DI,
 ) -> None:
     """Logout from the current device by revoking the refresh token.
 
@@ -87,8 +84,8 @@ async def logout(
     },
 )
 async def logout_all_devices(
-        user_id: UserID,
-        auth_service: Annotated[AuthService, Depends()],
+    user_id: UserID,
+    auth_service: AuthService.DI,
 ) -> None:
     """Logout from all devices by invalidating all user tokens.
 

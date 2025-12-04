@@ -1,6 +1,7 @@
 """Redis configuration and connection management"""
 
 from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
 
 import redis.asyncio as aioredis
 
@@ -51,6 +52,36 @@ async def get_redis() -> AsyncGenerator[aioredis.Redis]:
         async def get_cache(redis: Redis = Depends(get_redis)):
             value = await redis.get("key")
             return {"value": value}
+    """
+    if redis_pool is None:
+        raise RuntimeError("Redis pool not initialized. Call init_redis() first.")
+
+    redis_client = aioredis.Redis(connection_pool=redis_pool)
+
+    try:
+        yield redis_client
+    finally:
+        await redis_client.aclose()
+
+
+@asynccontextmanager
+async def get_redis_context() -> AsyncGenerator[aioredis.Redis]:
+    """Provide Redis client as context manager.
+
+    Use this for ARQ workers and other non-FastAPI contexts where
+    dependency injection is not available.
+
+    Yields:
+        Redis client instance that auto-closes after use.
+
+    Raises:
+        RuntimeError: If Redis pool not initialized.
+
+    Example:
+        async def my_arq_task(ctx: dict, user_id: UUID):
+            async with get_redis_context() as redis:
+                jwt_service = JWTService(redis)
+                await jwt_service.revoke_all_user_tokens(user_id)
     """
     if redis_pool is None:
         raise RuntimeError("Redis pool not initialized. Call init_redis() first.")
